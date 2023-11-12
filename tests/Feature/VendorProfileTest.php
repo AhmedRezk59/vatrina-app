@@ -2,20 +2,35 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Events\NewVendorRegistered;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class VendorProfileTest extends TestCase
 {
     use RefreshDatabase;
+
+    private Vendor $vendor;
+    private $token;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->vendor = Vendor::factory(1)->create()->first();
+        $this->token = JWTAuth::fromUser($this->vendor);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        unset($this->vendor);
+        unset($this->token);
+    }
 
     public function test_unauth_vendor_cannot_get_info()
     {
@@ -26,47 +41,32 @@ class VendorProfileTest extends TestCase
 
     public function test_get_vendor_info(): void
     {
-        $vendor = Vendor::factory(1)->create()->first();
-        $token = JWTAuth::fromUser($vendor);
-
-        $res = $this->getJson(route('vendor.user') . "?token=$token");
+        $res = $this->getJson(route('vendor.user') . "?token=$this->token");
 
         $res->assertStatus(200);
     }
 
     public function test_failed_update_vendor_info(): void
     {
-        $vendor = Vendor::factory(1)->create([
-            'first_name' => 'ahmed'
-        ])->first();
-        $token = JWTAuth::fromUser($vendor);
-
-        $res = $this->putJson(route('vendor.updateInfo') . "?token=$token");
+        $res = $this->putJson(route('vendor.updateInfo') . "?token=$this->token");
 
         $res->assertStatus(422);
     }
 
     public function test_update_vendor_info(): void
     {
-        $vendor = Vendor::factory(1)->create([
-            'first_name' => 'ahmed'
-        ])->first();
-        $token = JWTAuth::fromUser($vendor);
 
-        $res = $this->putJson(route('vendor.updateInfo') . "?token=$token", array_merge(
-            $vendor->toArray(),
-            ['first_name' => 'kareem']
+        $res = $this->putJson(route('vendor.updateInfo') . "?token=$this->token", array_merge(
+            $this->vendor->toArray(),
+            ['first_name' => 'ahmed']
         ));
         $res->assertStatus(201);
-        $res->assertJsonPath('data.first_name', 'kareem');
+        $res->assertJsonPath('data.first_name', 'ahmed');
     }
 
     public function test_failed_vendor_update_password()
     {
-        $vendor = Vendor::factory(1)->create()->first();
-        $token = JWTAuth::fromUser($vendor);
-
-        $res = $this->putJson(route('vendor.updatePassword') . "?token=$token");
+        $res = $this->putJson(route('vendor.updatePassword') . "?token=$this->token");
 
         $res->assertStatus(422);
         $res->assertJsonPath('data.password.0', 'The password field is required.');
@@ -74,10 +74,7 @@ class VendorProfileTest extends TestCase
 
     public function test_vendor_update_password()
     {
-        $vendor = Vendor::factory(1)->create()->first();
-        $token = JWTAuth::fromUser($vendor);
-
-        $res = $this->putJson(route('vendor.updatePassword') . "?token=$token", [
+        $res = $this->putJson(route('vendor.updatePassword') . "?token=$this->token", [
             'password' => '12345678',
             'new_password' => '123456789',
             'new_password_confirmation' => '123456789',
@@ -88,26 +85,39 @@ class VendorProfileTest extends TestCase
 
     public function test_failed_vendor_update_avatar()
     {
-        $vendor = Vendor::factory(1)->create()->first();
-        $token = JWTAuth::fromUser($vendor);
-
-        $res = $this->putJson(route('vendor.updateAvatar') . "?token=$token");
+        $res = $this->putJson(route('vendor.updateAvatar') . "?token=$this->token");
 
         $res->assertStatus(422);
     }
 
     public function test_vendor_update_avatar()
     {
-        $vendor = Vendor::factory(1)->create()->first();
-        $token = JWTAuth::fromUser($vendor);
-
         Storage::fake('public');
+        Event::fake([NewVendorRegistered::class]);
+        
+        $vendor = [
+            "first_name" => "Freeman",
+            "last_name" => "Murray",
+            "email" => "stacy52@corwin.com",
+            "username" => "Elias Kutch",
+            "phone_number" => "+1-858-539-2720",
+            'avatar' => UploadedFile::fake()->image('hi.png', 200, 200),
+            "password" => "12345678",
+            "password_confirmation" => "12345678",
+        ];
 
-        $res = $this->putJson(route('vendor.updateAvatar') . "?token=$token", [
+        $registerResponse = $this->postJson(
+            route('vendor.register'),
+            $vendor
+        );
+
+        $updateResponse = $this->putJson(route('vendor.updateAvatar') . "?token={$registerResponse->json('data')['token']}", [
             "avatar" => UploadedFile::fake()->image('hi.png', 350, 300),
         ]);
-        Storage::disk('public')->assertExists('vendors/avatars/' . 1  . '/' . ltrim($res->json()['data']['avatar'], '/storage/' . 'vendors/avatars/' . 1  . '/'));
 
-        $res->assertStatus(201);
+        Storage::disk('public')->assertExists(ltrim($updateResponse->json()['data']['avatar'], '/storage/'));
+        Storage::disk('public')->assertMissing(ltrim($registerResponse->json('data')['data']['avatar'], '/storage/'));
+
+        $updateResponse->assertStatus(201);
     }
 }

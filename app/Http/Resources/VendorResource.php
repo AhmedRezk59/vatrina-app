@@ -22,7 +22,7 @@ class VendorResource extends JsonResource
             "username" => $this->username,
             "email" => $this->email,
             "phone_number" => $this->phone_number,
-            "avatar" => 'storage/vendors/avatars/' . $this->id  .$this->avatar,
+            "avatar" => 'storage/vendors/avatars/' . $this->id .'/' . ltrim($this->avatar, '/' ),
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
         ];

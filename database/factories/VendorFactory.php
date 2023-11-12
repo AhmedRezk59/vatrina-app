@@ -20,13 +20,14 @@ class VendorFactory extends Factory
     public function definition(): array
     {
         return [
-            'first_name'=>$this->faker->firstName(),
-            'last_name'=>$this->faker->lastName(),
-            'email'=>$this->faker->email(),
-            'username'=>$this->faker->name(),
-            'phone_number'=>$this->faker->phoneNumber(),
-            'avatar' => $this->faker->image(category:'png'),
-            'password' => Hash::make('12345678')
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'email' => $this->faker->email(),
+            'username' => $this->faker->name(),
+            'phone_number' => $this->faker->phoneNumber(),
+            'avatar' => $this->faker->image(category: 'png'),
+            'password' =>'12345678',
+            'is_banned' => false
         ];
     }
 }

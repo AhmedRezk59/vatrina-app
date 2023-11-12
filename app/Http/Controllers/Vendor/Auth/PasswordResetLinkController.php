@@ -27,7 +27,7 @@ class PasswordResetLinkController extends Controller
         $status = Password::broker('vendors')->sendResetLink(
             $request->only('email')
         );
-        
+
         if ($status != Password::RESET_LINK_SENT) {
             throw ValidationException::withMessages([
                 'email' => [__($status)],

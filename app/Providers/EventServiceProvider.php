@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Events\NewUserRegistered;
+use App\Events\NewVendorRegistered;
+use App\Listeners\SendUserVerificationEmail;
+use App\Listeners\SendUserWhatsappMessege;
+use App\Listeners\SendVendorVerificationEmail;
+use App\Listeners\SendVendorWhatsappMessege;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -17,6 +22,14 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        NewVendorRegistered::class => [
+            SendVendorVerificationEmail::class,
+            SendVendorWhatsappMessege::class
+        ],
+        NewUserRegistered::class => [
+            SendUserVerificationEmail::class,
+            SendUserWhatsappMessege::class,
         ],
     ];
 

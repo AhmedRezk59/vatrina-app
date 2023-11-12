@@ -21,9 +21,10 @@ return new class extends Migration
             $table->string('avatar');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_banned')->default(false);
             $table->rememberToken();
             $table->timestamps();
-            $table->index(['first_name' , 'last_name']);
+            $table->index(['first_name' , 'last_name','email']);
         });
     }
 

@@ -33,7 +33,7 @@ class VendorProfileService
         }
 
         $vendor->update([
-            'password' => Hash::make($request->new_password)
+            'password' => $request->new_password
         ]);
 
         return $vendor;
@@ -42,11 +42,11 @@ class VendorProfileService
     public function updateAvatar($request): Vendor
     {
         $vendor = Vendor::find($request->user('api-vendor')->id);
-        
+
         Storage::disk('public')->put('/vendors/avatars/' . $vendor->id, $request->file('avatar'));
-        
+
         Storage::disk('public')->delete('/vendors/avatars/' . $vendor->id . '/' . $vendor->avatar);
-        
+
         $vendor->update([
             'avatar' => $request->file('avatar')->hashName()
         ]);

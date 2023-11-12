@@ -26,7 +26,7 @@ class AuthenticatedSessionController extends Controller
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string']
         ]);
-        if($validator->fails()){
+        if ($validator->fails()) {
             throw new ValidationException($validator);
         }
         $vendor = Vendor::select('id', 'email', 'password')->where('email', $request->email)->first();

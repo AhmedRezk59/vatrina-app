@@ -4,11 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Mail\SendVendorResetLinkEmail;
+use App\Notifications\SendVendorResetLinkEmail;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -46,6 +48,17 @@ class Vendor extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function password():Attribute
+    {
+        return new Attribute(
+            set: fn($value) => Hash::make($value)
+        );
+    }
+    public function getRouteKeyName(): string
+    {
+        return 'username';
+    }
 
     public function getJWTIdentifier()
     {

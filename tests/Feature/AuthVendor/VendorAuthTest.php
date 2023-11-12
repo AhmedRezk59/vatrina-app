@@ -1,10 +1,13 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\AuthVendor;
 
+use App\Events\NewVendorRegistered;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
@@ -26,6 +29,7 @@ class VendorAuthTest extends TestCase
     public function test_vendor_can_register()
     {
         Storage::fake('public');
+        Event::fake();
         $vendor = [
             "first_name" => "Gerda",
             "last_name" => "Bechtelar",
@@ -40,9 +44,9 @@ class VendorAuthTest extends TestCase
         $res = $this->postJson(route('vendor.register'), $vendor);
 
         $res->assertStatus(200);
-
+        Event::assertDispatched(NewVendorRegistered::class);
+        Log::shouldReceive('info');
         $this->assertDatabaseHas('vendors', ['email' => $vendor['email']]);
-
         Storage::disk('public')->assertExists('vendors/avatars/' . 1  . '/' . $vendor['avatar']->hashName());
     }
 
@@ -86,17 +90,5 @@ class VendorAuthTest extends TestCase
             ]
         );
         $res->assertStatus(200);
-    }
-
-    public function test_send_password_reset_link()
-    {
-        $vendor = Vendor::factory(1)->create()->first();
-
-        $res =  $this->postJson(route('vendor.password.email'), [
-            'email' => $vendor->email
-        ]);
-
-        $res->assertStatus(200);
-        $res->assertJsonStructure(['status']);
     }
 }

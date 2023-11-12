@@ -10,10 +10,12 @@ use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
+use NotificationChannels\WhatsApp\Exceptions\CouldNotSendNotification;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 class Handler extends ExceptionHandler
@@ -74,7 +76,6 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-
         if ($request->expectsJson()) {
             if ($exception instanceof PostTooLargeException) {
                 return $this->apiResponse(
@@ -85,6 +86,21 @@ class Handler extends ExceptionHandler
             }
 
             if ($exception instanceof MethodNotAllowedHttpException) {
+                return $this->apiResponse(
+                    status: 'error',
+                    msg: $exception->getMessage(),
+                    code: 400
+                );
+            }
+            if ($exception instanceof \Illuminate\Auth\Access\AuthorizationException) {
+                return $this->apiResponse(
+                    status: 'error',
+                    msg: $exception->getMessage(),
+                    code: $exception->status()
+                );
+            }
+
+            if ($exception instanceof CouldNotSendNotification) {
                 return $this->apiResponse(
                     status: 'error',
                     msg: $exception->getMessage(),
@@ -109,7 +125,7 @@ class Handler extends ExceptionHandler
             if ($exception instanceof ModelNotFoundException) {
                 return $this->apiResponse(
                     status: 'error',
-                    msg: 'Resource not found',
+                    msg: $exception->getMessage(),
                     code: 404
                 );
             }
@@ -129,14 +145,14 @@ class Handler extends ExceptionHandler
                     msg: 'There was Issue with the Query',
                     code: 500
                 );
-            } 
-             if ($exception instanceof JWTException) {
+            }
+            if ($exception instanceof JWTException) {
                 return $this->apiResponse(
                     status: 'error',
                     msg: $exception->getMessage(),
                     code: 401
                 );
-            }  
+            }
             if ($exception instanceof NotFoundHttpException) {
                 return $this->apiResponse(
                     status: 'error',
@@ -166,5 +182,24 @@ class Handler extends ExceptionHandler
 
 
         return parent::render($request, $exception);
+    }
+
+    /**
+     * @param Throwable $e
+     * @return array
+     */
+    protected function convertExceptionToArray(Throwable $e): array
+    {
+        return config('app.debug') ? [
+        'message' => $e->getMessage(),
+        'exception' => get_class($e),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => collect($e->getTrace())->map(fn ($trace) => Arr::except($trace, ['args']))->all(),
+    ] : [
+        'status' => "error",
+        'message' => $this->isHttpException($e) ? $e->getMessage() : 'Server Error',
+            "code" => $e->getCode(),
+    ];
     }
 }
