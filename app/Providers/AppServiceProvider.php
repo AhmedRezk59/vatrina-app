@@ -7,11 +7,13 @@ use App\Contracts\GetCollectionsInterface;
 use App\Contracts\GetProductsInterface;
 use App\Contracts\ProductContract;
 use App\Contracts\ProductControllerContract;
+use App\Contracts\VendorProfileContract;
 use App\Repositories\FilterForCollectionContract;
 use App\Repositories\FilterForProductContract;
 use App\Repositories\GetCollectionsRepository;
 use App\Repositories\GetProductsRepository;
 use App\Repositories\ProductControllerRepository;
+use App\Repositories\VendorProfileRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProductControllerContract::class , ProductControllerRepository::class);
         $this->app->bind(GetProductsInterface::class , GetProductsRepository::class);
         $this->app->bind(GetCollectionsInterface::class , GetCollectionsRepository::class);
+        $this->app->bind(VendorProfileContract::class , VendorProfileRepository::class);
     }
 
     /**

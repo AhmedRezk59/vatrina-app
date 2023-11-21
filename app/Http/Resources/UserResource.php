@@ -21,7 +21,7 @@ class UserResource extends JsonResource
             "username" => $this->username,
             "email" => $this->email,
             "phone_number" => $this->phone_number,
-            "avatar" => 'storage/users/avatars/' . $this->id . '/' . ltrim($this->avatar, '/'),
+            "avatar" => route('user.user.interface.avatar', $this->id),
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
         ];

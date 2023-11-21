@@ -29,7 +29,7 @@ class VendorRegistrationRequest extends ApiRequest
             'username' => ['required', 'string', 'max:55', 'unique:' . Vendor::class],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . Vendor::class],
             'phone_number' => ['required', 'string', 'max:20', 'min:8'],
-            'avatar' => ['required', 'image', 'mimes:png,jpg,jpeg', 'dimensions:min_width=150,min_height=150,max_width=500,max_height=500'],
+            'avatar' => ['required', 'file' ,'image', 'mimes:png,jpg,jpeg', 'dimensions:min_width=150,min_height=150,max_width=500,max_height=500'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ];
     }

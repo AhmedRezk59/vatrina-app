@@ -55,6 +55,7 @@ class Vendor extends Authenticatable implements JWTSubject
             set: fn($value) => Hash::make($value)
         );
     }
+    
     public function getRouteKeyName(): string
     {
         return 'username';

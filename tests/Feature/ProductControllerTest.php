@@ -41,10 +41,9 @@ class ProductControllerTest extends TestCase
         Product::factory(11)->for($this->vendor)->create();
 
         $response = $this->getJson(route('vendor.products.index', $this->vendor) . "?token={$this->token}");
-
         $response->assertStatus(200);
         $response->assertJson(function (AssertableJson $json) {
-            $json->has('data.data', 10)
+            $json->has('data', 10)
                 ->etc();
         });
     }
@@ -52,11 +51,10 @@ class ProductControllerTest extends TestCase
     public function test_valid_store_product(): void
     {
         Storage::fake('public');
-
+        $image = UploadedFile::fake()->image('hi.png', 200, 200);
         $response = $this->postJson(
             route('vendor.products.store') . "?token={$this->token}",
-            Product::factory(1)->for($this->collection)->for($this->vendor)->make([
-                'image' => UploadedFile::fake()->image('hi.png', 200, 200)
+            Product::factory(1)->for($this->collection)->for($this->vendor)->make(['image' => $image
             ])->first()->toArray()
         );
 
@@ -67,7 +65,7 @@ class ProductControllerTest extends TestCase
 
         $this->assertDatabaseCount('products', 1);
 
-        Storage::disk('public')->assertExists(ltrim($response->json('data')['image'], '/storage'));
+        Storage::disk('public')->assertExists('vendors/products/' . $this->vendor->id . '/' . $image->hashName());
     }
 
     public function test_in_valid_store_product(): void
@@ -91,9 +89,8 @@ class ProductControllerTest extends TestCase
     public function test_update_product_method()
     {
         Storage::fake('public');
-
-        $product = Product::factory(1)->for($this->collection)->for($this->vendor)->make([
-            'image' => UploadedFile::fake()->image('hi.png', 200, 200)
+        $image1 = UploadedFile::fake()->image('hi.png', 200, 200);
+        $product = Product::factory(1)->for($this->collection)->for($this->vendor)->make(['image' => $image1
         ])->first()->toArray();
 
         $storeResponse = $this->postJson(
@@ -102,16 +99,16 @@ class ProductControllerTest extends TestCase
         );
 
         $newName = 'new name';
-
+        $image2 = UploadedFile::fake()->image('hi.png', 300, 250);
         $updateResponse = $this->putJson(route('vendor.products.update', 1) . "?token={$this->token}", [
             ...$product,
             'name' => $newName,
-            'image' => UploadedFile::fake()->image('hi.png', 300, 250)
+            'image' => $image2
         ]);
 
-        Storage::disk('public')->assertExists(ltrim($updateResponse->json('data')['image'], '/storage'));
+        Storage::disk('public')->assertMissing('vendors/products/' . $this->vendor->id . '/' . $image1->hashName());
 
-        Storage::disk('public')->assertMissing(ltrim($storeResponse->json('data')['image'], 'storage/'));
+        Storage::disk('public')->assertExists('vendors/products/' . $this->vendor->id . '/' . $image2->hashName());
 
         $updateResponse->assertJsonPath('data.name', $newName);
         $updateResponse->assertStatus(201);

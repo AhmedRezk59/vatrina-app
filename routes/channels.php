@@ -1,5 +1,8 @@
 <?php
 
+use App\Broadcasting\SendMessageToUser;
+use App\Broadcasting\SendMessageToVendor;
+use App\Models\Vendor;
 use Illuminate\Support\Facades\Broadcast;
 
 /*
@@ -13,6 +16,5 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
-});
+Broadcast::channel('sendMessageToVendor.{vendor}',SendMessageToVendor::class, ['guards' => "api"]);
+Broadcast::channel('sendMessageToUser.{user}',SendMessageToUser::class, ['guards' => "api-vendor"]);

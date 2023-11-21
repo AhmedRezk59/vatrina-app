@@ -29,7 +29,7 @@ class AuthenticatedSessionController extends Controller
         if ($validator->fails()) {
             throw new ValidationException($validator);
         }
-        $vendor = Vendor::select('id', 'email', 'password')->where('email', $request->email)->first();
+        $vendor = Vendor::where('email', $request->email)->first();
         if (!$vendor) {
             return $this->apiResponse(
                 status: 'error',

@@ -13,7 +13,6 @@ use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-use function PHPSTORM_META\type;
 
 class VendorAuthTest extends TestCase
 {
@@ -30,13 +29,14 @@ class VendorAuthTest extends TestCase
     {
         Storage::fake('public');
         Event::fake();
+        $avatar = UploadedFile::fake()->image('hi.png', 350, 300);
         $vendor = [
             "first_name" => "Gerda",
             "last_name" => "Bechtelar",
             "username" => "Bechtelar",
             "email" => "sally88@yahoo.com",
             "phone_number" => "0101028471",
-            "avatar" => UploadedFile::fake()->image('hi.png', 350, 300),
+            "avatar" => $avatar,
             "password" => "NK[fOy;3$\'J",
             "password_confirmation" => "NK[fOy;3$\'J"
         ];
@@ -44,10 +44,15 @@ class VendorAuthTest extends TestCase
         $res = $this->postJson(route('vendor.register'), $vendor);
 
         $res->assertStatus(200);
+
         Event::assertDispatched(NewVendorRegistered::class);
         Log::shouldReceive('info');
         $this->assertDatabaseHas('vendors', ['email' => $vendor['email']]);
-        Storage::disk('public')->assertExists('vendors/avatars/' . 1  . '/' . $vendor['avatar']->hashName());
+
+        Storage::disk('public')->assertExists('vendors/avatars/' . $avatar->hashName());
+        
+        $this->get($res->json('data')['data']['avatar'])
+            ->assertOk();
     }
 
     public function test_invalid_login_for_vendor(): void

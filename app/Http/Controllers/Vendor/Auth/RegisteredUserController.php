@@ -21,9 +21,9 @@ class RegisteredUserController extends Controller
      */
     public function store(VendorRegistrationRequest $request): JsonResponse
     {
-        $vendor = Vendor::create([...$request->validated() , 'avatar' => $request->file('avatar')->hashName()]);
+        $path = Storage::disk('public')->put('/vendors/avatars', $request->avatar);
 
-        Storage::disk('public')->put('/vendors/avatars/' . $vendor->id, $request->avatar);
+        $vendor = Vendor::create([...$request->validated(), 'avatar' => $path]);
 
         event(new NewVendorRegistered($vendor, 'general', 'You have signed up for ' . config('app.name')));
 

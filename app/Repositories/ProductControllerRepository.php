@@ -12,12 +12,12 @@ class ProductControllerRepository implements ProductControllerContract
 {
     public function storeProduct(Request $request): Product
     {
+        $path = $request->file('image')->store('/vendors/products/' . $request->user('api-vendor')->id, 'public');
         $product = Product::create([
             ...$request->validated(),
-            'image' => $request->file('image')->hashName()
+            'image' => $path
         ]);
 
-        $request->file('image')->store('/vendors/products/' . $request->user('api-vendor')->id, 'public');
         return $product;
     }
 
@@ -29,7 +29,7 @@ class ProductControllerRepository implements ProductControllerContract
 
         if (isset($request->image)) {
             $data['image'] = $request->file('image')->hashName();
-            Storage::disk('public')->delete('vendors/products/' . $product->vendor_id . '/' . $product->image);
+            Storage::disk('public')->delete($product->image);
             $request->file('image')->store('/vendors/products/' . $product->vendor_id, 'public');
         }
 

@@ -8,12 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
+use App\Http\Resources\ProductResourceCollection;
 use App\Models\Product;
 use App\Models\Vendor;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
@@ -32,10 +31,8 @@ class ProductController extends Controller
             ->whereBelongsTo($vendor)
             ->with(['collection', 'vendor'])
             ->jsonPaginate(10);
-
-        return $this->apiResponse(
-            data: $products
-        );
+        
+        return ProductResource::collection($products);
     }
 
     /**
@@ -68,7 +65,7 @@ class ProductController extends Controller
     {
         $this->productRepository->ensureVendorOwnsProduct($request, $product);
 
-        $product = $this->productRepository->updateProduct($request,$product);
+        $product = $this->productRepository->updateProduct($request, $product);
 
         return $this->apiResponse(
             data: ProductResource::make($product),

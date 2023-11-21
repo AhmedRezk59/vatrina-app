@@ -21,11 +21,12 @@ class RegisteredUserController extends Controller
      */
     public function store(UserRegistrationRequest $request): JsonResponse
     {
-        $user = User::create([...$request->validated() , 'avatar' => $request->file("avatar")->hashName()]);
+        $path = Storage::disk('public')->put('/users/avatars/', $request->avatar);
+        
+        $user = User::create([...$request->validated() , 'avatar' => $path]);
 
-        Storage::disk('public')->put('/users/avatars/' . $user->id, $request->avatar);
 
-        event(new NewUserRegistered($user, 'new_user_registered' ,'You have signed up for ' . config('app.name')));
+        event(new NewUserRegistered($user, 'general' ,'You have signed up for ' . config('app.name')));
 
         Log::info("New User signed up with an email {$user->email}");
 

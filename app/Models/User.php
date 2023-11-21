@@ -48,10 +48,16 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
-    public function password():Attribute
+
+    public function getRouteKeyName(): string
+    {
+        return 'username';
+    }
+
+    public function password(): Attribute
     {
         return new Attribute(
-            set: fn($value) => Hash::make($value)
+            set: fn ($value) => Hash::make($value)
         );
     }
 

@@ -17,7 +17,7 @@ class NewVendorRegistered
     /**
      * Create a new event instance.
      */
-    public function __construct(public $vendor, public string $template, public string $text = '')
+    public function __construct(public $vendor, public string $template = "general", public string $text = '')
     {
     }
 }

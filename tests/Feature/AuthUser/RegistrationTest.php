@@ -45,6 +45,6 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => $user['email']]);
         Log::shouldReceive('info');
         Event::assertDispatched(NewUserRegistered::class);
-        Storage::disk('public')->assertExists('users/avatars/' . 1  . '/' . $user['avatar']->hashName());
+        $this->get(route('user.user.interface.avatar', "Bechtelar"))->assertOk();
     }
 }
