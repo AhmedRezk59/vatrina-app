@@ -33,6 +33,7 @@ class ChatControllerTest extends TestCase
     {
         parent::tearDown();
         unset($this->vendor);
+        unset($this->user);
         unset($this->vendorToken);
         unset($this->userToken);
     }

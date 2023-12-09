@@ -19,7 +19,7 @@ class UserVendorController extends Controller
      *
      * @param ProductContract $productContract
      * @param GetProductsInterface $getProducts
-     * @param $vendorUserName
+     * @param string $vendorUserName
      * @param null $collection_id
      * @return JsonResponse
      */

@@ -4,10 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Notifications\SendUserResetLink;
+use App\Notifications\SendAdminResetLinkEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class Admin extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -49,17 +48,16 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
-
-    public function getRouteKeyName(): string
-    {
-        return 'username';
-    }
-
     public function password(): Attribute
     {
         return new Attribute(
             set: fn ($value) => Hash::make($value)
         );
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'username';
     }
 
     public function getJWTIdentifier()
@@ -74,16 +72,6 @@ class User extends Authenticatable implements JWTSubject
 
     public function sendPasswordResetNotification($token)
     {
-        $this->notify(new SendUserResetLink($token));
-    }
-
-    public function cart(): HasMany
-    {
-        return $this->hasMany(Cart::class);
-    }
-
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
+        $this->notify(new SendAdminResetLinkEmail($token));
     }
 }

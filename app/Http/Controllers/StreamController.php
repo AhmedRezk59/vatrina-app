@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Vendor;
@@ -25,6 +26,17 @@ class StreamController extends Controller
     public function getUserAvatar(User $user)
     {
         $path = Storage::disk('public')->path($user->avatar);
+
+        if (file_exists($path)) {
+            return response()->download($path, null, [], null);
+        } else {
+            throw new FileNotFoundException('This file doesn\'t exist');
+        }
+    }
+    
+    public function getAdminAvatar(Admin $admin)
+    {
+        $path = Storage::disk('public')->path($admin->avatar);
 
         if (file_exists($path)) {
             return response()->download($path, null, [], null);

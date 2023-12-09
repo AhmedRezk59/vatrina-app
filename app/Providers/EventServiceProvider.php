@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\NewAdminRegistered;
 use App\Events\NewUserRegistered;
 use App\Events\NewVendorRegistered;
+use App\Listeners\SendAdminVerificationEmail;
+use App\Listeners\SendAdminWhatsappMessage;
 use App\Listeners\SendUserVerificationEmail;
 use App\Listeners\SendUserWhatsappMessege;
 use App\Listeners\SendVendorVerificationEmail;
@@ -31,6 +34,10 @@ class EventServiceProvider extends ServiceProvider
             SendUserVerificationEmail::class,
             SendUserWhatsappMessege::class,
         ],
+        NewAdminRegistered::class => [
+            SendAdminWhatsappMessage::class,
+            SendAdminVerificationEmail::class
+        ]
     ];
 
     /**

@@ -14,20 +14,28 @@ class Product extends Model
     {
         parent::boot();
         static::creating(function ($model) {
-            if(!isset($model->vendor_id)){
+            if (!isset($model->vendor_id)) {
                 $model->vendor_id = request()->user('api-vendor')->id;
             }
         });
     }
-    
-    
+
+
     public function collection(): BelongsTo
     {
         return $this->belongsTo(Collection::class);
     }
-    
+
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function endPrice(): float
+    {
+        if ($this->price_after_discount == 0) {
+            return (float) $this->price;
+        }
+        return (float)$this->price_after_discount;
     }
 }

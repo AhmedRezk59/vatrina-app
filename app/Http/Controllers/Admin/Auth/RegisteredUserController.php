@@ -1,15 +1,17 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\Admin\Auth;
 
+use App\Events\NewAdminRegistered;
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\Request;
+use App\Http\Requests\AdminRegisterationRequest;
+use App\Http\Resources\AdminResource;
+use App\Models\Admin;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class RegisteredUserController extends Controller
 {
@@ -18,24 +20,24 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): Response
+    public function store(AdminRegisterationRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        $path = Storage::disk('public')->put('/admins/avatars/', $request->avatar);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $admin = Admin::create([...$request->validated(), 'avatar' => $path]);
 
-        event(new Registered($user));
 
-        Auth::login($user);
+        event(new NewAdminRegistered($admin, 'general', 'You have signed up for ' . config('app.name')));
 
-        return response()->noContent();
+        Log::info("New Admin signed up with an email {$admin->email}");
+
+        $token = JWTAuth::fromUser($admin);
+
+        return $this->apiResponse(
+            [
+                'token' => $token,
+                'data' => AdminResource::make($admin)
+            ]
+        );
     }
 }

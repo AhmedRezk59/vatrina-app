@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Admin;
 use App\Models\Vendor;
 
 return [
@@ -50,6 +51,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'vendors',
         ],
+        'api-admin' => [
+            'driver' => 'jwt',
+            'provider' => 'admins',
+        ],
     ],
 
     /*
@@ -77,6 +82,10 @@ return [
         'vendors' => [
             'driver' => 'eloquent',
             'model' => Vendor::class
+        ],
+        'admins' => [
+            'driver' => 'eloquent',
+            'model' => Admin::class
         ],
 
         // 'users' => [
@@ -115,6 +124,12 @@ return [
         'vendors' => [
             'provider' => 'vendors',
             'table' => 'vendors_password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'admins' => [
+            'provider' => 'admins',
+            'table' => 'admins_password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
         ],

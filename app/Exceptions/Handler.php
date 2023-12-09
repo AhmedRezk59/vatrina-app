@@ -96,7 +96,7 @@ class Handler extends ExceptionHandler
                 return $this->apiResponse(
                     status: 'error',
                     msg: $exception->getMessage(),
-                    code: $exception->status()
+                    code: 403
                 );
             }
 
@@ -174,7 +174,7 @@ class Handler extends ExceptionHandler
             if ($exception instanceof \Error) {
                 return $this->apiResponse(
                     status: 'error',
-                    msg: "There was some internal error",
+                    msg: app()->isProduction() ? "There was some internal error" : $exception->getMessage(),
                     code: 500
                 );
             }

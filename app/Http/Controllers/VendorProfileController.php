@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Vendor;
+namespace App\Http\Controllers;
 
 use App\Contracts\VendorProfileContract;
 use App\Http\Controllers\Controller;
