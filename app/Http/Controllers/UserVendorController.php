@@ -23,13 +23,13 @@ class UserVendorController extends Controller
      * @param null $collection_id
      * @return JsonResponse
      */
-    public function getProductsVendorInterfaceForUser(ProductContract $productContract ,GetProductsInterface $getProducts,$vendorUserName):JsonResponse
+    public function getProductsVendorInterfaceForUser(ProductContract $productContract ,GetProductsInterface $getProducts,Vendor $vendor):JsonResponse
     {
-        $products = $getProducts->getProducts($productContract,$vendorUserName);
+        $products = $getProducts->getProducts($productContract,$vendor);
 
         return $this->apiResponse(
             data: $products,
-            msg: "You have successfully retrieved the products for the vendor $vendorUserName."
+            msg: "You have successfully retrieved the products for the vendor {$vendor->username}."
         );
     }
 
@@ -41,13 +41,13 @@ class UserVendorController extends Controller
      * @param $vendorUserName
      * @return JsonResponse
      */
-    public function getCollectionsVendorInterfaceForUser(CollectionContract $collectionContract , GetCollectionsInterface $getCollections,$vendorUserName):JsonResponse
+    public function getCollectionsVendorInterfaceForUser(CollectionContract $collectionContract , GetCollectionsInterface $getCollections,Vendor $vendor):JsonResponse
     {
-        $collections = $getCollections->getCollections($collectionContract,$vendorUserName);
+        $collections = $getCollections->getCollections($collectionContract,$vendor);
 
         return $this->apiResponse(
             data:$collections,
-            msg: "You have successfully retrieved the collections for the vendor $vendorUserName."
+            msg: "You have successfully retrieved the collections for the vendor {$vendor->username}."
         );
     }
 

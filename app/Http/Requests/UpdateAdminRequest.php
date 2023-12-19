@@ -3,16 +3,17 @@
 namespace App\Http\Requests;
 
 use App\Models\Admin;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
-class AdminRegisterationRequest extends ApiRequest
+class UpdateAdminRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->admin->is(auth('api-admin')->user());
     }
 
     /**
@@ -25,13 +26,11 @@ class AdminRegisterationRequest extends ApiRequest
         return [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'max:55', 'unique:' . Admin::class],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:' . Admin::class],
+            'username' => ['required', 'string', 'max:55', Rule::unique('admins')->ignore($this->user('api-admin')->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('admins')->ignore($this->user('api-admin')->id)],
             'phone_number' => ['required', 'string', 'max:20', 'min:8'],
-            'avatar' => ['required', 'file', 'image', 'mimes:png,jpg,jpeg', 'dimensions:min_width=150,min_height=150,max_width=500,max_height=500'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'permissions' => ['sometimes', 'nullable', 'array',],
-            'permissions.*' => ['sometimes', 'nullable', 'exists:permissions,name']
+            'avatar' => ['sometimes', 'nullable', 'image', 'mimes:png,jpg,jpeg', 'dimensions:min_width=150,min_height=150,max_width=500,max_height=500'],
+            'password' => ['sometimes', 'nullable', 'confirmed', Rules\Password::defaults()],
         ];
     }
 }

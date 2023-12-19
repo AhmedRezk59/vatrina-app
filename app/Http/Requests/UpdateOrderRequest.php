@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateOrderRequest extends FormRequest
+class UpdateOrderRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

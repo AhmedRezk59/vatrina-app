@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Notifications\SendWhatsappMessegeNotification;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 class SendWhatsappMessage
 {
-    public function __construct(private Model $model, private string $text, private string $template = "general")
+    public function __construct(private Authenticatable $model, private string $text, private string $template = "general")
     {
     }
 

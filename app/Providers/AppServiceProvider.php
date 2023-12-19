@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\AdminContract;
+use App\Contracts\AdminControllerInterface;
 use App\Contracts\CollectionContract;
 use App\Contracts\GetCollectionsInterface;
 use App\Contracts\GetProductsInterface;
@@ -9,6 +11,8 @@ use App\Contracts\OrderControllerRepositoryInterface;
 use App\Contracts\ProductContract;
 use App\Contracts\ProductControllerContract;
 use App\Contracts\VendorProfileContract;
+use App\Repositories\AdminControllerRepository;
+use App\Repositories\FilterForAdminContract;
 use App\Repositories\FilterForCollectionContract;
 use App\Repositories\FilterForProductContract;
 use App\Repositories\GetCollectionsRepository;
@@ -34,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(GetCollectionsInterface::class, GetCollectionsRepository::class);
         $this->app->bind(VendorProfileContract::class, VendorProfileRepository::class);
         $this->app->bind(OrderControllerRepositoryInterface::class, OrderControllerRepository::class);
+        $this->app->bind(AdminContract::class, FilterForAdminContract::class);
+        $this->app->bind(AdminControllerInterface::class, AdminControllerRepository::class);
     }
 
     /**

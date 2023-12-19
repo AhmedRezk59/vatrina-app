@@ -9,7 +9,10 @@ trait WithApiResponse
     protected function apiResponse($data = null, int $code = 200, string $status = 'success', string $msg = ''): JsonResponse
     {
         $arr = [];
-
+        if ($status == 'success' && !($code > 199 && $code < 300)) {
+            $status = 'error';
+        }
+        
         $arr['status'] = $status;
 
         if ((is_array($data) && count($data) > 0) || (!is_array($data) && isset($data))) {
@@ -19,7 +22,7 @@ trait WithApiResponse
         if ($msg != '') {
             $arr['msg'] = $msg;
         }
-        
+
         return response()->json(
             $arr,
             $code

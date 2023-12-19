@@ -7,8 +7,10 @@ use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\Vendor;
+use App\Services\SendWhatsappMessage;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
@@ -30,15 +32,18 @@ class OrderController extends Controller
      */
     public function store(OrderControllerRepositoryInterface $orderControllerRepository, Vendor $vendor)
     {
-        DB::beginTransaction();
-
-        try {
-            $orderControllerRepository->createOrder($vendor);
-            $orderControllerRepository->emptyUserCart($vendor);
-            DB::commit();
+        Gate::forUser($vendor)->authorize('ensure-vendor-is-not-banned');
+        
+        try{
+            DB::transaction(function () use ($orderControllerRepository, $vendor) {
+                $orderControllerRepository->createOrder($vendor);
+                $orderControllerRepository->emptyUserCart($vendor);
+            }, 5);
             $orderControllerRepository->logNewOrderCreated($vendor);
-        } catch (\Throwable $th) {
-            DB::rollBack();
+            (new SendWhatsappMessage($vendor ,"new order got created by " . auth()->user()->name ))->send();
+            (new SendWhatsappMessage(auth()->user() ,"You have created order successfully." ))->send();
+
+        }catch(\Throwable){
             $orderControllerRepository->logNewOrderFailedToCreate($vendor, $th);
         }
 
@@ -64,6 +69,8 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
+        Gate::forUser($order->vendor)->authorize('ensure-vendor-is-not-banned');
+        
         $order->update($request->validated());
 
         return $this->apiResponse(

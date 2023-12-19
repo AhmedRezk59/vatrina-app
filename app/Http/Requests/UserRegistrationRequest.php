@@ -3,10 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\User;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
-class UserRegistrationRequest extends FormRequest
+class UserRegistrationRequest extends ApiRequest
 {
     /**
      * Determine if the user is authorized to make this request.

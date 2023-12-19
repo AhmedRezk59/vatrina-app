@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Admin;
 use App\Models\Product;
 use App\Models\Vendor;
 use Illuminate\Auth\Access\Response;
@@ -25,6 +26,18 @@ class GatesServiceProvider extends ServiceProvider
     {
         Gate::define('vendor-owns-product', function (Vendor $vendor, Product $product) {
             return $product->vendor_id == $vendor->id
+                ? Response::allow()
+                : Response::denyWithStatus(403);
+        });
+
+        Gate::define('admin-can-delete-himself', function (Admin $admin, Admin $admin2) {
+            return $admin->is($admin2)
+                ? Response::allow()
+                : Response::denyWithStatus(403);
+        });
+        
+        Gate::define('ensure-vendor-is-not-banned', function (Vendor $vendor) {
+            return ! $vendor->is_banned
                 ? Response::allow()
                 : Response::denyWithStatus(403);
         });

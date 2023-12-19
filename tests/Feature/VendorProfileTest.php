@@ -53,16 +53,29 @@ class VendorProfileTest extends TestCase
 
         $res->assertStatus(422);
     }
+    public function test_banned_vendor_cannot_update_vendor_info(): void
+    {
+        $token = JWTAuth::fromUser(Vendor::factory()->create([
+            'is_banned' => true
+        ]));
+
+        $res = $this->putJson(route('vendor.updateInfo') . "?token=$token");
+
+        $res->assertStatus(403);
+    }
 
     public function test_update_vendor_info(): void
     {
 
         $res = $this->actingAs($this->vendor)->putJson(route('vendor.updateInfo') . "?token=$this->token", array_merge(
             $this->vendor->toArray(),
-            ['first_name' => 'ahmed']
+            [
+                'first_name' => 'ahmed',
+                "last_name" => "Mohamed"
+            ]
         ));
         $res->assertStatus(201);
-        $res->assertJsonPath('data.first_name', 'ahmed');
+        $res->assertJsonPath('data.name', 'ahmed Mohamed');
     }
 
     public function test_failed_vendor_update_password()
@@ -95,7 +108,7 @@ class VendorProfileTest extends TestCase
     {
         Storage::fake('public');
         Event::fake([NewVendorRegistered::class]);
-        
+
         $avatar = UploadedFile::fake()->image('hi.png', 200, 200);
         $vendor = [
             "first_name" => "Freeman",
@@ -112,7 +125,7 @@ class VendorProfileTest extends TestCase
             route('vendor.register'),
             $vendor
         );
-       
+
         $avatar2 = UploadedFile::fake()->image('hi.png', 350, 300);
         $updateResponse = $this->actingAs($this->vendor)->putJson(route('vendor.updateAvatar') . "?token={$registerResponse->json('data')['token']}", [
             "avatar" => $avatar2,

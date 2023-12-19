@@ -3,8 +3,9 @@
 
 namespace App\Contracts;
 
+use App\Models\Vendor;
 
 interface GetCollectionsInterface
 {
-    public function getCollections(CollectionContract $collectionContract , $vendorUserName);
+    public function getCollections(CollectionContract $collectionContract , Vendor $vendor);
 }

@@ -142,7 +142,7 @@ class Handler extends ExceptionHandler
 
                 return $this->apiResponse(
                     status: 'error',
-                    msg: 'There was Issue with the Query',
+                    msg: app()->isProduction() ? 'There was Issue with the Query' : $exception->getMessage(),
                     code: 500
                 );
             }

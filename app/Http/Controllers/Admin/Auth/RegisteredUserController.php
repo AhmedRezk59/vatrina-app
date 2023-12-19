@@ -24,8 +24,8 @@ class RegisteredUserController extends Controller
     {
         $path = Storage::disk('public')->put('/admins/avatars/', $request->avatar);
 
-        $admin = Admin::create([...$request->validated(), 'avatar' => $path]);
-
+        $admin = Admin::create(collect([...$request->validated(), 'avatar' => $path])->except('permissions')->toArray());
+        $admin->givePermissions($request->permissions ?: []);
 
         event(new NewAdminRegistered($admin, 'general', 'You have signed up for ' . config('app.name')));
 
