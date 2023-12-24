@@ -18,7 +18,8 @@ class CartController extends Controller
         ]);
 
         return $this->apiResponse(
-            msg: "Product got added to the cart"
+            msg: "Product got added to the cart",
+            code: 200
         );
     }
 
