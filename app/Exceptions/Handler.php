@@ -191,15 +191,16 @@ class Handler extends ExceptionHandler
     protected function convertExceptionToArray(Throwable $e): array
     {
         return config('app.debug') ? [
-        'message' => $e->getMessage(),
-        'exception' => get_class($e),
-        'file' => $e->getFile(),
-        'line' => $e->getLine(),
-        'trace' => collect($e->getTrace())->map(fn ($trace) => Arr::except($trace, ['args']))->all(),
-    ] : [
-        'status' => "error",
-        'message' => $this->isHttpException($e) ? $e->getMessage() : 'Server Error',
+            'message' => $e->getMessage(),
+            'exception' => get_class($e),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => collect($e->getTrace())->map(fn ($trace) => Arr::except($trace, ['args']))->all(),
+        ] : [
+            'status' => "error",
+            'message' => $this->isHttpException($e) ? $e->getMessage() : 'Server Error',
             "code" => $e->getCode(),
-    ];
+        ];
     }
+
 }
